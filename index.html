@@ -233,7 +233,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .btn.primary{background:var(--accent);color:var(--accent-ink)}
 .btn.ghost{flex:0 0 auto;padding:0 18px;background:none;border:1px solid var(--line);color:var(--muted)}
 
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px) scale(.97);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13.5px;opacity:0;transition:opacity .25s var(--ease),transform .3s var(--ease);z-index:20;max-width:calc(100% - 32px);text-align:center;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px) scale(.97);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13.5px;opacity:0;transition:opacity .25s var(--ease),transform .3s var(--ease);z-index:60;max-width:calc(100% - 32px);text-align:center;pointer-events:none}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -414,7 +414,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   const HK="svc-hol-v1";
   let liveHol=null; try{liveHol=JSON.parse(localStorage.getItem(HK)||"null");}catch(e){}
   function shortName(n){
-    if(/대체/.test(n)) return "대체휴일";
+    if(/대체|쉬는/.test(n)) return "대체휴일";
     if(/임시/.test(n)) return "임시휴일";
     if(/설날/.test(n)) return "설날";
     if(/추석/.test(n)) return "추석";
@@ -429,7 +429,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     const t=n.split(/[ ·(]/)[0]; return t.length>5?t.slice(0,5):t;
   }
   function holOf(s){
-    const n=liveHol&&liveHol.map?liveHol.map[s]:null;
+    let n=liveHol&&liveHol.map?liveHol.map[s]:null;
+    if(n&&/대체|쉬는/.test(n)){ const base=n.replace(/쉬는\s*날|대체\s*공휴일|대체\s*휴일|[()]/g,"").trim(); n=base?base+" 대체공휴일":"대체공휴일"; }
     if(n) return [shortName(n),n];
     return HOL[s]||null;
   }
