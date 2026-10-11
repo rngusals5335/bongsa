@@ -25,6 +25,7 @@ html,body{margin:0}
 body{min-height:100vh;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
 button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
 
+
 /* Layout: one quiet column — month heading, monthly total, Sunday-first calendar that slides between months; tapping a day raises a bottom sheet. */
 :root{
   --bg:#F1EEF5;
@@ -236,6 +237,29 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px) scale(.97);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:13.5px;opacity:0;transition:opacity .25s var(--ease),transform .3s var(--ease);z-index:60;max-width:calc(100% - 32px);text-align:center;pointer-events:none}
 .toast.on{opacity:1;transform:translate(-50%,0)}
+.auth{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px 20px;overflow-y:auto;transition:opacity .35s var(--ease),visibility .35s}
+.auth.out{opacity:0;visibility:hidden}
+.auth[hidden],.acct form[hidden]{display:none}
+.auth-box{width:100%;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.auth-mark{width:64px;height:64px;border-radius:17px;background:var(--accent);display:grid;place-items:center;margin-bottom:6px}
+.auth-mark svg{width:38px;height:38px}
+.auth-box h2{margin:0;font-family:var(--f-display);font-size:26px;font-weight:700}
+.auth-sub{margin:0 0 6px;font-size:13.5px;color:var(--muted);text-align:center;line-height:1.55}
+.auth form{width:100%;display:flex;flex-direction:column;gap:10px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12.5px;color:var(--muted)}
+.field input{box-sizing:border-box;width:100%;height:50px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);font:16px var(--f-body);padding:0 14px}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.auth .sbtn.primary{height:52px;margin-top:8px;font-size:15.5px;font-weight:600}
+.auth-err{min-height:20px;margin:0;font-size:13px;color:var(--sun);text-align:center}
+.auth-foot{margin-top:4px;font-size:12px;color:var(--faint);text-align:center}
+.acct{display:flex;flex-direction:column;gap:8px}
+.acct form{display:flex;flex-direction:column;gap:8px}
+.acct input{box-sizing:border-box;width:100%;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font:16px var(--f-body);padding:0 12px}
+.acct input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.acct-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.acct-row .sbtn{margin-top:0}
+
 /* launch screen */
 .splash{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .35s var(--ease),visibility .35s}
 .splash.out{opacity:0;visibility:hidden}
@@ -261,6 +285,35 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     </svg>
   </div>
   <div class="splash-bar"><i></i></div>
+</div>
+
+<div class="auth" id="auth" hidden>
+  <div class="auth-box">
+    <div class="auth-mark" aria-hidden="true">
+      <svg viewBox="0 0 50 50" fill="none">
+        <rect x="7" y="11" width="36" height="32" rx="7" fill="var(--accent-ink)"/>
+        <rect x="7" y="11" width="36" height="9" rx="4" fill="var(--accent-ink)" opacity=".75"/>
+        <rect x="15" y="7" width="4" height="9" rx="2" fill="var(--accent-ink)"/>
+        <rect x="31" y="7" width="4" height="9" rx="2" fill="var(--accent-ink)"/>
+        <g fill="var(--accent)" opacity=".28"><rect x="13" y="24" width="5" height="5" rx="1.5"/><rect x="22.5" y="24" width="5" height="5" rx="1.5"/><rect x="32" y="24" width="5" height="5" rx="1.5"/><rect x="13" y="33" width="5" height="5" rx="1.5"/><rect x="32" y="33" width="5" height="5" rx="1.5"/></g>
+        <rect x="21.5" y="32" width="7" height="7" rx="2" fill="var(--accent)"/>
+      </svg>
+    </div>
+    <h2 id="authTitle">로그인</h2>
+    <p class="auth-sub" id="authSub">관리자에게 받은 아이디와 비밀번호를 입력하세요</p>
+    <form id="loginForm" novalidate>
+      <div class="field"><label for="loginId">아이디</label><input id="loginId" type="text" autocomplete="username" autocapitalize="off" spellcheck="false"></div>
+      <div class="field"><label for="loginPw">비밀번호</label><input id="loginPw" type="password" autocomplete="current-password"></div>
+      <button class="sbtn primary" type="submit" id="loginBtn">로그인</button>
+    </form>
+    <form id="newPwForm" novalidate hidden>
+      <div class="field"><label for="newPw1">새 비밀번호</label><input id="newPw1" type="password" autocomplete="new-password" placeholder="4자 이상"></div>
+      <div class="field"><label for="newPw2">새 비밀번호 확인</label><input id="newPw2" type="password" autocomplete="new-password"></div>
+      <button class="sbtn primary" type="submit" id="newPwBtn">비밀번호 저장하고 시작하기</button>
+    </form>
+    <p class="auth-err" id="authErr" role="alert"></p>
+    <p class="auth-foot">비밀번호를 잊으면 관리자에게 알려주세요</p>
+  </div>
 </div>
 
 <div class="app">
@@ -321,21 +374,19 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     </div>
   </section>
 
-  <section class="dsec setup" id="setup">
-    <div class="dsec-title">구글 시트 연결 <span class="pill" id="setupSum">연결 안 됨</span></div>
-    <div class="inner" id="setupForm">
-      <p class="dsec-desc">기록이 구글 시트에 자동으로 저장되고, 공휴일도 최신 정보로 받아와요.</p>
-      <label for="urlIn">웹 앱 주소</label>
-      <input id="urlIn" type="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" autocapitalize="off" spellcheck="false">
-      <label for="keyIn">비밀 키</label>
-      <input id="keyIn" type="text" placeholder="시트 코드에 적은 비밀 키" autocomplete="off" autocapitalize="off" spellcheck="false">
-      <button class="sbtn primary" id="connectBtn">연결하기</button>
+  <section class="dsec acct">
+    <div class="dsec-title">계정 <span class="pill on" id="acctId">-</span></div>
+    <p class="dsec-desc">기록은 자동으로 서버에 저장돼서, 다른 폰에서 로그인해도 그대로 불러와요.</p>
+    <div class="acct-row">
+      <button class="sbtn" id="pwToggle">비밀번호 변경</button>
+      <button class="sbtn" id="logoutBtn">로그아웃</button>
     </div>
-    <div class="inner" id="setupDone" hidden>
-      <p class="dsec-desc">기록이 구글 시트에 자동으로 저장되고 있어요. 공휴일은 앱을 열 때마다 새로 받아와요.</p>
-      <a class="link-btn" id="sheetLink" href="#" target="_blank" rel="noopener" hidden>구글 시트 열기<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg></a>
-      <button class="sbtn" id="disconnectBtn">연결 끊기</button>
-    </div>
+    <form id="pwForm" hidden autocomplete="off">
+      <input id="pwCur" type="password" placeholder="현재 비밀번호" autocomplete="current-password">
+      <input id="pwNew" type="password" placeholder="새 비밀번호 (4자 이상)" autocomplete="new-password">
+      <input id="pwNew2" type="password" placeholder="새 비밀번호 확인" autocomplete="new-password">
+      <button class="sbtn primary" type="submit" id="pwSave">변경하기</button>
+    </form>
   </section>
 
   <section class="dsec">
@@ -375,7 +426,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 <div class="modal" id="resetModal" role="alertdialog" aria-modal="true" aria-labelledby="resetTitle" aria-describedby="resetDesc" aria-hidden="true">
   <h3 id="resetTitle">전체 기록을 지울까요?</h3>
   <p id="resetDesc">지금까지 기록한 모든 봉사 시간이 지워져요. <b>지운 기록은 되돌릴 수 없어요.</b></p>
-  <p class="warn" id="resetSheetWarn" hidden>연결된 구글 시트의 기록도 함께 지워져요.</p>
+  <p class="warn">서버에 저장된 내 기록도 함께 지워져요.</p>
   <div class="row">
     <button class="mcancel" id="resetCancel">취소</button>
     <button class="mreset" id="resetOk">확인</button>
@@ -460,9 +511,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     return HOL[s]||null;
   }
   async function fetchHolidays(){
-    if(!cfg) return;
+    if(!sess) return;
     try{
-      const r=await fetch(cfg.url+"?key="+encodeURIComponent(cfg.key)+"&hol=1"); const j=await r.json();
+      const j=await api({action:"holidays",id:sess.id,token:sess.token});
       if(!j||!j.ok||!j.holidays) return;
       const map=j.holidays, years=[...new Set(Object.keys(map).map(x=>x.slice(0,4)))];
       if(!years.length) return;
@@ -472,8 +523,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     }catch(e){}
   }
 
-  try{const raw=localStorage.getItem(LS); if(raw) S.data=JSON.parse(raw)||{};}catch(e){}
-  function cache(){try{localStorage.setItem(LS,JSON.stringify(S.data));}catch(e){}}
+  function cache(){ if(!sess) return; try{localStorage.setItem(LS+"-"+sess.id,JSON.stringify(S.data));}catch(e){} }
 
   const num=h=>Number.isInteger(h)?String(h):h.toFixed(1);
   function hm(h){if(!h) return "0시간";const w=Math.floor(h),mi=Math.round((h-w)*60);return (w?w+"시간":"")+(w&&mi?" ":"")+(mi?mi+"분":"");}
@@ -767,32 +817,43 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   let tt;
   function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),2000);}
 
-  // ---------- google sheet sync (local first, sheet in the background) ----------
-  const CFG="svc-sheet-cfg", PQ="svc-sheet-pending";
-  let cfg=null, pending={}, busy=false, lastPull=0, gen=0;
-  try{cfg=JSON.parse(localStorage.getItem(CFG)||"null");}catch(e){}
-  try{pending=JSON.parse(localStorage.getItem(PQ)||"{}")||{};}catch(e){}
-  const savePQ=()=>{try{localStorage.setItem(PQ,JSON.stringify(pending));}catch(e){}};
+  // ---------- server sync (local first, server in the background) ----------
+  const API="https://script.google.com/macros/s/AKfycbzoz7272jHyxmg3UOmJ5u0JSl-qv5IO4xKK1bpAHxVbtM6lEAKIt0UNQ_xzyGS3rGTCHg/exec";          // the web app address of the sheet script
+  const SK="svc-session", PQ="svc-pending";
+  let sess=null, pending={}, busy=false, lastPull=0, gen=0;
+  try{ sess=JSON.parse(localStorage.getItem(SK)||"null"); }catch(e){}
+  const savePQ=()=>{ if(!sess) return; try{localStorage.setItem(PQ+"-"+sess.id,JSON.stringify(pending));}catch(e){} };
 
-  function queue(k,d,v){ if(!cfg) return; gen++; pending[ds(k,d)]=v; savePQ(); flush(); }
+  async function api(body){
+    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)});
+    return r.json();
+  }
+  // the session stopped being valid (password changed elsewhere, or reset by the admin)
+  function authLost(){ endSession(); showAuth("login","다시 로그인해 주세요"); }
+
+  function queue(k,d,v){ if(!sess) return; gen++; pending[ds(k,d)]=v; savePQ(); flush(); }
   async function flush(){
-    if(!cfg||busy) return;
+    if(!sess||busy) return;
     const keys=Object.keys(pending); if(!keys.length) return;
-    busy=true; const sent={}; keys.forEach(x=>sent[x]=pending[x]); let ok=false;
+    busy=true; const sent={}; keys.forEach(x=>sent[x]=pending[x]); let ok=false, lost=false;
     try{
-      const r=await fetch(cfg.url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
-        body:JSON.stringify({key:cfg.key,changes:Object.keys(sent).map(date=>({date,hours:sent[date]}))})});
-      const j=await r.json();
+      const j=await api({action:"save",id:sess.id,token:sess.token,changes:Object.keys(sent).map(date=>({date,hours:sent[date]}))});
       if(j&&j.ok){ ok=true; gen++; for(const x in sent){ if(pending[x]===sent[x]) delete pending[x]; } savePQ(); }
+      else if(j&&j.error==="auth") lost=true;
     }catch(e){}
     busy=false;
+    if(lost){ authLost(); return; }
     const more=Object.keys(pending).some(x=>!(x in sent)||pending[x]!==sent[x]);
     if(more) flush(); else if(ok) pull();
   }
-  async function fetchDays(c){ const r=await fetch(c.url+"?key="+encodeURIComponent(c.key)); return r.json(); }
   async function pull(){
-    if(!cfg) return; lastPull=Date.now(); const g=gen;
-    try{ const j=await fetchDays(cfg); if(j&&j.ok){ keepSheetUrl(j.sheetUrl); if(g===gen) apply(j.days||{}); else pull(); } }catch(e){}
+    if(!sess) return; lastPull=Date.now(); const g=gen, who=sess.id;
+    try{
+      const j=await api({action:"days",id:sess.id,token:sess.token});
+      if(!sess||sess.id!==who) return;
+      if(j&&j.ok){ if(g===gen) apply(j.days||{}); else pull(); }
+      else if(j&&j.error==="auth") authLost();
+    }catch(e){}
   }
   function apply(days){
     const nd={};
@@ -806,41 +867,81 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     const same=JSON.stringify(nd)===JSON.stringify(S.data);
     S.data=nd; cache(); if(!same) render();
   }
-  function keepSheetUrl(u){
-    if(!cfg||!u||!/^https:\/\/docs\.google\.com\//.test(u)||cfg.sheetUrl===u) return;
-    cfg.sheetUrl=u; try{localStorage.setItem(CFG,JSON.stringify(cfg));}catch(e){}
-    renderSettings();
+
+  // ---------- login ----------
+  let tempPw="", tempId="";
+  function showAuth(mode,msg){
+    const a=$("auth"); a.hidden=false; a.classList.remove("out");
+    const login=mode==="login";
+    $("loginForm").hidden=!login; $("newPwForm").hidden=login;
+    $("authTitle").textContent=login?"로그인":"새 비밀번호 설정";
+    $("authSub").textContent=login?"관리자에게 받은 아이디와 비밀번호를 입력하세요":"처음 로그인하셨네요. 앞으로 쓸 비밀번호를 정해 주세요";
+    $("authErr").textContent=msg||"";
+    if(login){ $("loginPw").value=""; } else { $("newPw1").value=""; $("newPw2").value=""; }
   }
-  function renderSettings(){
-    $("setupForm").hidden=!!cfg; $("setupDone").hidden=!cfg;
-    const sl=$("sheetLink"); if(cfg&&cfg.sheetUrl){ sl.href=cfg.sheetUrl; sl.hidden=false; } else sl.hidden=true;
-    const pill=$("setupSum"); pill.textContent=cfg?"연결됨":"연결 안 됨"; pill.classList.toggle("on",!!cfg);
+  function hideAuth(){ const a=$("auth"); a.classList.add("out"); setTimeout(()=>{ a.hidden=true; },380); }
+  const errText=c=>({auth:"아이디 또는 비밀번호가 맞지 않아요",locked:"여러 번 틀려서 잠시 막혔어요. 10분 뒤에 다시 시도해 주세요",short:"비밀번호는 4자 이상으로 정해 주세요"})[c]||"잠시 후 다시 시도해 주세요";
+  function busyBtn(b,on,label){ b.disabled=on; b.textContent=on?"확인하는 중…":label; }
+
+  function startSession(id,token){
+    sess={id,token}; try{localStorage.setItem(SK,JSON.stringify(sess));}catch(e){}
+    try{ S.data=JSON.parse(localStorage.getItem(LS+"-"+id)||"{}")||{}; }catch(e){ S.data={}; }
+    try{ pending=JSON.parse(localStorage.getItem(PQ+"-"+id)||"{}")||{}; }catch(e){ pending={}; }
+    gen++; render(); renderAccount(); flush(); pull(); fetchHolidays();
   }
-  $("connectBtn").onclick=async()=>{
-    const url=$("urlIn").value.trim(), k=$("keyIn").value.trim();
-    if(!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(url)){toast("주소는 https://script.google.com/macros/s/ 로 시작해서 /exec 로 끝나야 해요");return;}
-    if(!k){toast("비밀 키를 입력해 주세요");return;}
-    const b=$("connectBtn"); b.disabled=true; b.textContent="연결하는 중…";
+  function endSession(){
+    if(sess){ try{ localStorage.removeItem(SK); localStorage.removeItem(LS+"-"+sess.id); localStorage.removeItem(PQ+"-"+sess.id); }catch(e){} }
+    sess=null; pending={}; gen++; S.data={}; render(); closeDrawer();
+  }
+
+  $("loginForm").addEventListener("submit",async e=>{
+    e.preventDefault();
+    const id=$("loginId").value.trim().toLowerCase(), pw=$("loginPw").value;
+    if(!id||!pw){ $("authErr").textContent="아이디와 비밀번호를 입력해 주세요"; return; }
+    const b=$("loginBtn"); busyBtn(b,true,"로그인"); $("authErr").textContent="";
     try{
-      const j=await fetchDays({url,key:k});
-      if(!j||!j.ok){ toast(j&&j.error==="key"?"비밀 키가 시트 코드에 적은 것과 달라요":"연결하지 못했어요. 배포 설정을 확인해 주세요"); }
-      else{
-        cfg={url,key:k}; if(j.sheetUrl&&/^https:\/\/docs\.google\.com\//.test(j.sheetUrl)) cfg.sheetUrl=j.sheetUrl; try{localStorage.setItem(CFG,JSON.stringify(cfg));}catch(e){}
-        const remote=j.days||{};
-        for(const mk in S.data) for(const d in S.data[mk]){ const x=ds(mk,d); if(!(x in remote)&&+S.data[mk][d]>0) pending[x]=+S.data[mk][d]; }
-        savePQ(); apply(remote); renderSettings();
-        toast("구글 시트와 연결했어요"); flush(); fetchHolidays();
-      }
-    }catch(e){ toast("연결하지 못했어요. 주소와 '모든 사용자' 액세스 설정을 확인해 주세요"); }
-    b.disabled=false; b.textContent="연결하기";
-  };
-  let armed=false;
-  $("disconnectBtn").onclick=()=>{
-    const b=$("disconnectBtn");
-    if(!armed){armed=true;b.textContent="한 번 더 누르면 연결을 끊어요";setTimeout(()=>{armed=false;b.textContent="연결 끊기";},3000);return;}
-    armed=false; b.textContent="연결 끊기";
-    cfg=null; pending={}; try{localStorage.removeItem(CFG);localStorage.removeItem(PQ);}catch(e){}
-    renderSettings(); toast("연결을 끊었어요. 기록은 이 폰에 남아 있어요");
+      const j=await api({action:"login",id,pw});
+      if(j&&j.ok&&j.needNew){ tempId=id; tempPw=pw; showAuth("newpw"); setTimeout(()=>$("newPw1").focus(),50); }
+      else if(j&&j.ok&&j.token){ startSession(id,j.token); hideAuth(); toast("반가워요"); }
+      else $("authErr").textContent=errText(j&&j.error);
+    }catch(err){ $("authErr").textContent="서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요"; }
+    busyBtn(b,false,"로그인");
+  });
+  $("newPwForm").addEventListener("submit",async e=>{
+    e.preventDefault();
+    const a=$("newPw1").value, c=$("newPw2").value;
+    if(a.length<4){ $("authErr").textContent=errText("short"); return; }
+    if(a!==c){ $("authErr").textContent="두 비밀번호가 서로 달라요"; return; }
+    const b=$("newPwBtn"); busyBtn(b,true,"비밀번호 저장하고 시작하기"); $("authErr").textContent="";
+    try{
+      const j=await api({action:"setpw",id:tempId,pw:tempPw,newPw:a});
+      if(j&&j.ok&&j.token){ tempPw=""; startSession(tempId,j.token); hideAuth(); toast("비밀번호를 저장했어요"); }
+      else $("authErr").textContent=errText(j&&j.error);
+    }catch(err){ $("authErr").textContent="서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요"; }
+    busyBtn(b,false,"비밀번호 저장하고 시작하기");
+  });
+
+  // ---------- account section in the menu ----------
+  function renderAccount(){ $("acctId").textContent=sess?sess.id:"-"; $("pwForm").hidden=true; }
+  $("pwToggle").onclick=()=>{ const f=$("pwForm"); f.hidden=!f.hidden; if(!f.hidden){ f.reset(); setTimeout(()=>$("pwCur").focus(),50); } };
+  $("pwForm").addEventListener("submit",async e=>{
+    e.preventDefault(); if(!sess) return;
+    const cur=$("pwCur").value, a=$("pwNew").value, c=$("pwNew2").value;
+    if(!cur){ toast("현재 비밀번호를 입력해 주세요"); return; }
+    if(a.length<4){ toast(errText("short")); return; }
+    if(a!==c){ toast("새 비밀번호 두 개가 서로 달라요"); return; }
+    const b=$("pwSave"); busyBtn(b,true,"변경하기");
+    try{
+      const j=await api({action:"setpw",id:sess.id,pw:cur,newPw:a});
+      if(j&&j.ok&&j.token){ sess.token=j.token; try{localStorage.setItem(SK,JSON.stringify(sess));}catch(e){} $("pwForm").hidden=true; toast("비밀번호를 바꿨어요"); }
+      else toast(j&&j.error==="auth"?"현재 비밀번호가 맞지 않아요":errText(j&&j.error));
+    }catch(err){ toast("서버에 연결하지 못했어요"); }
+    busyBtn(b,false,"변경하기");
+  });
+  $("logoutBtn").onclick=async()=>{
+    if(Object.keys(pending).length){ await flush(); }
+    if(Object.keys(pending).length){ toast("아직 저장되지 않은 기록이 있어요. 인터넷 연결 후 다시 시도해 주세요"); return; }
+    endSession(); showAuth("login"); toast("로그아웃했어요");
   };
 
   // ---------- menu drawer ----------
@@ -853,7 +954,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     $("drawer").classList.remove("on"); $("dscrim").classList.remove("on");
     $("drawer").setAttribute("aria-hidden","true"); $("menuBtn").setAttribute("aria-expanded","false");
   }
-  $("menuBtn").onclick=()=>{ renderMenuInfo(); openDrawer(); };
+  $("menuBtn").onclick=()=>{ renderMenuInfo(); renderAccount(); openDrawer(); };
   $("drawerClose").onclick=closeDrawer;
   $("dscrim").onclick=closeDrawer;
 
@@ -931,7 +1032,6 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
   // ---------- reset everything (asks for confirmation first) ----------
   function openReset(){
-    $("resetSheetWarn").hidden=!cfg;
     $("mscrim").classList.add("on"); const m=$("resetModal"); m.classList.add("on"); m.setAttribute("aria-hidden","false");
     setTimeout(()=>$("resetCancel").focus({preventScroll:true}),120);
   }
@@ -940,14 +1040,14 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   $("resetCancel").onclick=closeReset;
   $("mscrim").onclick=closeReset;
   $("resetOk").onclick=()=>{
-    if(cfg){
+    if(sess){
       for(const mk in S.data) for(const d in S.data[mk]){ if(+S.data[mk][d]>0) pending[ds(mk,d)]=0; }
       gen++; savePQ();
     }
     S.data={}; cache();
     closeReset(); closeDrawer(); render(true);
     toast("모든 기록을 지웠어요");
-    if(cfg) flush();
+    if(sess) flush();
   };
   document.addEventListener("keydown",e=>{
     if(e.key!=="Escape") return;
@@ -962,36 +1062,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     setTimeout(()=>{ sp.classList.add("out"); setTimeout(()=>sp.remove(),450); }, RM.matches?300:1750);
   })();
 
-  // ---------- open the sheet: Sheets app if installed, otherwise the phone's own browser ----------
-  $("sheetLink").addEventListener("click",e=>{
-    if(!cfg||!cfg.sheetUrl) return;
-    e.preventDefault();
-    const url=cfg.sheetUrl, ua=navigator.userAgent;
-    const iOS=/iPhone|iPad|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
-    const android=/Android/.test(ua);
-    if(android){
-      const m=url.match(/\/spreadsheets\/d\/([^/?#]+)/);
-      const path=m?"docs.google.com/spreadsheets/d/"+m[1]+"/edit":url.replace(/^https:\/\//,"");
-      location.href="intent://"+path+"#Intent;scheme=https;package=com.google.android.apps.docs.editors.sheets;S.browser_fallback_url="+encodeURIComponent(url)+";end";
-      return;
-    }
-    if(iOS){
-      let left=false; const mark=()=>{ if(document.visibilityState==="hidden") left=true; };
-      document.addEventListener("visibilitychange",mark);
-      location.href="googlesheets://"+url.replace(/^https:\/\//,"");
-      setTimeout(()=>{
-        document.removeEventListener("visibilitychange",mark);
-        if(!left) location.href="x-safari-"+url;   // no Sheets app: open in Safari itself
-      },1500);
-      return;
-    }
-    window.open(url,"_blank","noopener");
-  });
-
-  render(); renderSettings();
-  if(cfg){ flush(); pull(); fetchHolidays(); }
-  document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&cfg&&Date.now()-lastPull>20000){ flush(); pull(); } });
-  window.addEventListener("online",()=>{ if(cfg){ flush(); pull(); } });
+  if(sess) startSession(sess.id,sess.token); else { render(); showAuth("login"); }
+  document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&sess&&Date.now()-lastPull>20000){ flush(); pull(); } });
+  window.addEventListener("online",()=>{ if(sess){ flush(); pull(); } });
 })();
 </script>
 
