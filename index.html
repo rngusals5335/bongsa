@@ -97,6 +97,11 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .slot>span{display:block;will-change:transform}
 .slot>.old{position:absolute;left:0;top:0;width:100%}
 .total-num small{font-family:var(--f-body);font-size:15px;font-weight:500;color:var(--muted)}
+.total+.total{margin-top:-8px}
+/* both cards: the unit gets the same width (시간/건) so the two dials line up while the group stays centered */
+.total .total-num small{min-width:2.1em;text-align:left}
+button.total{width:100%;border:0;font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .15s var(--ease)}
+button.total:active{transform:scale(.98)}
 
 .cal{background:var(--surface);border-radius:18px;padding:14px 10px 12px;box-shadow:var(--shadow);touch-action:pan-y;overflow:hidden}
 .dow,.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
@@ -119,6 +124,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .day.today .n{background:var(--accent);color:var(--accent-ink);font-weight:600}
 .day .h{font-size:11.5px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1}
 .day.today .h{color:var(--ink)}
+.day.memo::before{content:"";position:absolute;top:6px;right:6px;width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:.75}
 .day.has::after{content:"";position:absolute;inset:auto 25% 1px;height:2px;border-radius:2px;background:var(--accent);opacity:.35}
 
 .note{font-size:12.5px;color:var(--muted);text-align:center;margin:0}
@@ -138,8 +144,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .dscrim.on{opacity:1;pointer-events:auto}
 .drawer{position:fixed;right:0;top:0;bottom:0;z-index:31;width:min(320px,86vw);background:var(--surface);box-shadow:-10px 0 30px rgba(0,0,0,.14);
   padding:calc(16px + env(safe-area-inset-top,0px)) 20px calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:22px;overflow-y:auto;
-  transform:translateX(105%);transition:transform .34s cubic-bezier(.2,.9,.25,1)}
-.drawer.on{transform:none}
+  transform:translateX(calc(100% + 40px));visibility:hidden;transition:transform .34s cubic-bezier(.2,.9,.25,1),visibility 0s linear .34s}
+.drawer.on{transform:none;visibility:visible;transition:transform .34s cubic-bezier(.2,.9,.25,1),visibility 0s}
 .drawer-head{display:flex;align-items:center;justify-content:space-between}
 .drawer-head h2{margin:0;font-family:var(--f-display);font-size:22px;font-weight:700}
 .dsec{display:flex;flex-direction:column;gap:10px}
@@ -212,9 +218,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .scrim{position:fixed;inset:0;background:var(--scrim);opacity:0;pointer-events:none;transition:opacity .28s var(--ease);z-index:10}
 .scrim.on{opacity:1;pointer-events:auto}
 .sheet{position:fixed;left:0;right:0;bottom:0;z-index:11;background:var(--surface);border-radius:22px 22px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.12);
-  padding:10px 20px calc(20px + env(safe-area-inset-bottom,0px));max-width:480px;margin:0 auto;transform:translateY(105%);transition:transform .34s cubic-bezier(.2,.9,.25,1);display:flex;flex-direction:column;gap:14px}
-.sheet.on{transform:none}
-.sheet.dragging{transition:none}
+  padding:10px 20px calc(20px + env(safe-area-inset-bottom,0px));max-width:480px;margin:0 auto;transform:translateY(calc(100% + 40px));visibility:hidden;transition:transform .34s cubic-bezier(.2,.9,.25,1),visibility 0s linear .34s;display:flex;flex-direction:column;gap:14px}
+.sheet.on{transform:none;visibility:visible;transition:transform .34s cubic-bezier(.2,.9,.25,1),visibility 0s}
+.sheet.dragging{transition:none;visibility:visible}
 .sheet-head{display:flex;flex-direction:column;gap:12px;touch-action:none}
 .grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto}
 .sheet h2{margin:0;font-family:var(--f-display);font-size:22px;font-weight:700}
@@ -230,6 +236,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .wheel-unit{position:absolute;top:80px;left:calc(50% + 14px);height:40px;line-height:40px;font-size:16px;font-weight:600;color:var(--ink);pointer-events:none}
 .wheel-scroll:focus-visible+.wheel-unit,.wheel:focus-within .wheel-band{box-shadow:0 0 0 2px var(--accent)}
 .actions{display:flex;gap:10px}
+.memo-in{display:block;width:100%;min-height:68px;resize:none;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);font:400 16px/1.45 var(--f-body);padding:11px 14px;outline:none;-webkit-appearance:none;appearance:none}
+.memo-in::placeholder{color:var(--faint)}
+.memo-in:focus{border-color:var(--accent)}
 .btn{flex:1;height:50px;border-radius:14px;border:0;font:600 15px var(--f-body);cursor:pointer;transition:transform .12s,filter .15s}
 .btn:active{transform:scale(.97)}
 .btn.primary{background:var(--accent);color:var(--accent-ink)}
@@ -335,13 +344,17 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     <div class="total-label" id="totalLabel">10월 봉사 시간</div>
     <div class="total-num"><span class="dial" id="dial" aria-hidden="true"></span><small>시간</small></div>
   </section>
+  <button class="total" id="studyCard" aria-live="polite">
+    <span class="total-label" id="studyLabel">10월 성서 연구</span>
+    <span class="total-num"><span class="dial" id="sdial" aria-hidden="true"></span><small>건</small></span>
+  </button>
 
   <section class="cal" id="cal">
     <div class="dow"><span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span></div>
     <div class="gw" id="gw"><div class="grid"></div></div>
   </section>
 
-  <p class="note" id="note">날짜를 누르면 시간을 기록할 수 있어요</p>
+  <p class="note" id="note">날짜나 성서 연구 칸을 눌러 기록할 수 있어요</p>
 
 </div>
 
@@ -355,7 +368,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <section class="dsec">
     <div class="dsec-title">이번 달 보고</div>
     <div class="report">
-      <div class="report-text" id="reportText">2026년 10월<span>봉사 시간 0시간</span></div>
+      <div class="report-text" id="reportText">2026년 10월<span>봉사 시간 0시간</span><span>성서 연구 0건</span></div>
       <button class="copy-btn" id="copyReport">복사</button>
     </div>
   </section>
@@ -445,8 +458,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   <div class="wheel">
     <div class="wheel-band"></div>
     <div class="wheel-scroll" id="wheelScroll" tabindex="0" role="slider" aria-label="봉사 시간" aria-valuemin="0" aria-valuemax="24" aria-valuenow="0"></div>
-    <div class="wheel-unit">시간</div>
+    <div class="wheel-unit" id="wheelUnit">시간</div>
   </div>
+  <textarea class="memo-in" id="memoIn" rows="2" maxlength="200" placeholder="메모 (선택)" aria-label="메모"></textarea>
   <div class="actions">
     <button class="btn ghost" id="clearBtn">지우기</button>
     <button class="btn primary" id="saveBtn">저장</button>
@@ -461,7 +475,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   const RM=window.matchMedia("(prefers-reduced-motion: reduce)");
   const EASE="cubic-bezier(.22,.8,.24,1)";
   const now=new Date();
-  const S={y:now.getFullYear(),m:now.getMonth(),data:{},sel:null,val:0};
+  const S={y:now.getFullYear(),m:now.getMonth(),data:{},memo:{},sel:null,val:0};
   const key=(y,m)=>y+"-"+String(m+1).padStart(2,"0");
   const LS="svc-hours-v1";
 
@@ -523,7 +537,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     }catch(e){}
   }
 
-  function cache(){ if(!sess) return; try{localStorage.setItem(LS+"-"+sess.id,JSON.stringify(S.data));}catch(e){} }
+  function cache(){ if(!sess) return; try{localStorage.setItem(LS+"-"+sess.id,JSON.stringify(S.data)); localStorage.setItem(LS+"-memo-"+sess.id,JSON.stringify(S.memo));}catch(e){} }
+  const memoOf=(k,d)=>(S.memo[k]||{})[d]||"";
 
   const num=h=>Number.isInteger(h)?String(h):h.toFixed(1);
   function hm(h){if(!h) return "0시간";const w=Math.floor(h),mi=Math.round((h-w)*60);return (w?w+"시간":"")+(w&&mi?" ":"")+(mi?mi+"분":"");}
@@ -534,15 +549,18 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     $("year").textContent=S.y;
     setMonthDial(S.m+1,dir); $("month").setAttribute("aria-label",S.y+"년 "+(S.m+1)+"월");
     $("totalLabel").textContent=(S.m+1)+"월 봉사 시간";
+    $("studyLabel").textContent=(S.m+1)+"월 성서 연구";
     const isCur=S.y===now.getFullYear()&&S.m===now.getMonth();
     const tb=$("todayBtn"); tb.classList.toggle("show",!isCur); tb.tabIndex=isCur?-1:0; tb.setAttribute("aria-hidden",isCur?"true":"false");
     renderTotal(stepwise);
   }
   function renderTotal(stepwise){
     const month=S.data[key(S.y,S.m)]||{};
-    let sum=0,cnt=0; for(const d in month){const v=+month[d]; if(v>0){sum+=v;cnt++;}}
+    let sum=0; for(const d in month){ if(d==="0") continue; const v=+month[d]; if(v>0) sum+=v; }
+    const st=+(month["0"]||0);
     $("totalLabel").setAttribute("aria-label",(S.m+1)+"월 봉사 시간 "+hm(sum));
-    setDial(sum);
+    $("studyCard").setAttribute("aria-label",(S.m+1)+"월 성서 연구 "+st+"건, 눌러서 바꾸기");
+    setDial(sum); setStudyDial(st);
   }
 
   // ---------- odometer dials: rising numbers roll down, falling numbers roll up ----------
@@ -644,6 +662,14 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     totalOdo.set(Math.floor(v),1000,()=>{ fracEl.textContent=frac; });
   }
 
+  // bible studies this month (stored as day "0" of the month)
+  const studyOdo=makeOdo($("sdial"),2);
+  let firstStudy=true;
+  function setStudyDial(v){
+    if(firstStudy){ firstStudy=false; studyOdo.set(v,0); return; }
+    studyOdo.set(v,1000);
+  }
+
   // month number
   const mdial=$("mdial");
   const monthOdo=makeOdo(mdial,2);
@@ -669,6 +695,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       const col=i%7; if(col===0) b.classList.add("sun"); if(col===6) b.classList.add("sat");
       const hol=holOf(ds(k,d)); if(hol) b.classList.add("hol");
       if(isCur&&d===now.getDate()) b.classList.add("today");
+      const mm=memoOf(k,d); if(mm) b.classList.add("memo");
       b.dataset.d=d;
       const n=document.createElement("span");n.className="n";n.textContent=d;b.appendChild(n);
       const meta=document.createElement("span"); meta.className="meta";
@@ -676,7 +703,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       const v=+(month[d]||0);
       if(v>0){b.classList.add("has");const h=document.createElement("span");h.className="h";h.textContent=num(v);meta.appendChild(h);}
       b.appendChild(meta);
-      b.setAttribute("aria-label",(S.m+1)+"월 "+d+"일"+(hol?" "+hol[1]:"")+(v>0?", "+hm(v):", 기록 없음"));
+      b.setAttribute("aria-label",(S.m+1)+"월 "+d+"일"+(hol?" "+hol[1]:"")+(v>0?", "+hm(v):", 기록 없음")+(mm?", 메모 있음":""));
       b.onclick=()=>{ if(!suppressClick) openSheet(d); };
       g.appendChild(b);
     }
@@ -742,7 +769,7 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
   // ---------- sheet ----------
   // hour wheel, like the iPhone timer
-  const WH=40, MAXH=24, ws=$("wheelScroll");
+  const WH=40, MAXH=30, ws=$("wheelScroll"); let maxV=24;
   (function(){
     const pad=()=>{const p=document.createElement("div");p.className="wheel-pad";return p;};
     ws.appendChild(pad());
@@ -763,32 +790,45 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
       it.style.transform=`perspective(500px) rotateX(${-off*19}deg) scale(${1-a*.05})`;
       it.style.opacity=String(Math.max(0,1-a*.28));
     });
-    const v=Math.max(0,Math.min(MAXH,Math.round(st/WH)));
+    const v=Math.max(0,Math.min(maxV,Math.round(st/WH)));
     if(v!==S.val){ S.val=v; ws.setAttribute("aria-valuenow",v); }
   }
   ws.addEventListener("scroll",()=>{cancelAnimationFrame(wraf);wraf=requestAnimationFrame(shade);},{passive:true});
   ws.addEventListener("keydown",e=>{
-    if(e.key==="ArrowUp"||e.key==="ArrowDown"){ e.preventDefault(); const v=Math.max(0,Math.min(MAXH,S.val+(e.key==="ArrowDown"?1:-1))); ws.scrollTo({top:v*WH,behavior:"smooth"}); }
+    if(e.key==="ArrowUp"||e.key==="ArrowDown"){ e.preventDefault(); const v=Math.max(0,Math.min(maxV,S.val+(e.key==="ArrowDown"?1:-1))); ws.scrollTo({top:v*WH,behavior:"smooth"}); }
   });
   function setWheel(v){ S.val=v; ws.scrollTop=v*WH; ws.setAttribute("aria-valuenow",v); shade(); }
   function openSheet(d){
     S.sel=d;
-    const k=key(S.y,S.m), cur=+((S.data[k]||{})[d]||0), hol=holOf(ds(k,d));
-    $("sheetTitle").textContent=(S.m+1)+"월 "+d+"일";
-    const sub=$("sheetSub"); sub.textContent=DOW[new Date(S.y,S.m,d).getDay()];
-    if(hol){ sub.append(" · "); const s=document.createElement("span"); s.className="hname"; s.textContent=hol[1]; sub.appendChild(s); }
-    if(cur) sub.append(" · 현재 "+hm(cur));
-    $("clearBtn").hidden=!cur;
+    const k=key(S.y,S.m), cur=+((S.data[k]||{})[d]||0), study=d===0;
+    const sub=$("sheetSub"), memo=study?"":memoOf(k,d);
+    maxV=study?30:24; witems.forEach((it,i)=>{ it.hidden=i>maxV; });
+    ws.setAttribute("aria-valuemax",maxV);
+    const mi=$("memoIn"); mi.hidden=study; mi.value=memo;
+    $("wheelUnit").textContent=study?"건":"시간";
+    ws.setAttribute("aria-label",study?"성서 연구 건수":"봉사 시간");
+    if(study){
+      $("sheetTitle").textContent=(S.m+1)+"월 성서 연구";
+      sub.textContent="이번 달에 성서 연구를 한 사람 수"+(cur?" · 현재 "+cur+"건":"");
+    } else {
+      const hol=holOf(ds(k,d));
+      $("sheetTitle").textContent=(S.m+1)+"월 "+d+"일";
+      sub.textContent=DOW[new Date(S.y,S.m,d).getDay()];
+      if(hol){ sub.append(" · "); const s=document.createElement("span"); s.className="hname"; s.textContent=hol[1]; sub.appendChild(s); }
+      if(cur) sub.append(" · 현재 "+hm(cur));
+    }
+    $("clearBtn").hidden=!cur&&!memo;
     const sh=$("sheet"); sh.style.transform="";
-    setWheel(Math.min(MAXH,Math.round(cur)));
+    setWheel(Math.min(maxV,Math.round(cur)));
     $("scrim").classList.add("on"); sh.classList.add("on");
-    requestAnimationFrame(()=>setWheel(Math.min(MAXH,Math.round(cur))));
+    requestAnimationFrame(()=>setWheel(Math.min(maxV,Math.round(cur))));
   }
-  function closeSheet(){ const sh=$("sheet"); sh.style.transform=""; $("scrim").classList.remove("on"); sh.classList.remove("on"); S.sel=null; }
+  function closeSheet(){ $("memoIn").blur(); const sh=$("sheet"); sh.style.transform=""; $("scrim").classList.remove("on"); sh.classList.remove("on"); S.sel=null; }
   $("scrim").onclick=closeSheet;
+  $("studyCard").onclick=()=>openSheet(0);
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&S.sel!==null)closeSheet();});
-  $("saveBtn").onclick=()=>commit(S.val);
-  $("clearBtn").onclick=()=>commit(0);
+  $("saveBtn").onclick=()=>commit(S.val,S.sel===0?undefined:$("memoIn").value.trim());
+  $("clearBtn").onclick=()=>commit(0,S.sel===0?undefined:"");
 
   // drag the sheet down to close
   (function(){
@@ -798,11 +838,14 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     hd.addEventListener("touchend",()=>{ if(y0===null) return; y0=null; sh.classList.remove("dragging"); if(dy>90) closeSheet(); else sh.style.transform=""; },{passive:true});
   })();
 
-  function commit(v){
+  function commit(v,memo){
     const k=key(S.y,S.m), d=S.sel; if(d===null)return;
     const month={...(S.data[k]||{})};
     if(v>0) month[d]=v; else delete month[d];
-    S.data[k]=month; cache(); closeSheet(); render(true);
+    S.data[k]=month;
+    const memoChanged=memo!==undefined&&memo!==memoOf(k,d);
+    if(memoChanged){ const mo={...(S.memo[k]||{})}; if(memo) mo[d]=memo; else delete mo[d]; S.memo[k]=mo; }
+    cache(); closeSheet(); render(true);
     if(motion()){
       const cell=$("gw").querySelector(`.day[data-d="${d}"]`);
       if(cell){
@@ -810,8 +853,9 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
         const h=cell.querySelector(".h"); if(h) h.animate([{opacity:0,transform:"translateY(4px)"},{opacity:1,transform:"none"}],{duration:300,delay:160,easing:EASE,fill:"backwards"});
       }
     }
-    toast(v>0?(S.m+1)+"월 "+d+"일 · "+hm(v)+" 저장했어요":(S.m+1)+"월 "+d+"일 기록을 지웠어요");
-    queue(k,d,v);
+    if(d===0) toast(v>0?(S.m+1)+"월 성서 연구 · "+v+"건 저장했어요":(S.m+1)+"월 성서 연구 기록을 지웠어요");
+    else toast(v>0?(S.m+1)+"월 "+d+"일 · "+hm(v)+" 저장했어요":memo?(S.m+1)+"월 "+d+"일 메모를 저장했어요":(S.m+1)+"월 "+d+"일 기록을 지웠어요");
+    queue(k,d,v,memoChanged?memo:undefined);
   }
 
   let tt;
@@ -820,9 +864,10 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   // ---------- server sync (local first, server in the background) ----------
   const API="https://script.google.com/macros/s/AKfycbzoz7272jHyxmg3UOmJ5u0JSl-qv5IO4xKK1bpAHxVbtM6lEAKIt0UNQ_xzyGS3rGTCHg/exec";          // the web app address of the sheet script
   const SK="svc-session", PQ="svc-pending";
-  let sess=null, pending={}, busy=false, lastPull=0, gen=0;
+  let sess=null, pending={}, pm={}, busy=false, lastPull=0, gen=0;   // pending hours / pending memos, by date
   try{ sess=JSON.parse(localStorage.getItem(SK)||"null"); }catch(e){}
-  const savePQ=()=>{ if(!sess) return; try{localStorage.setItem(PQ+"-"+sess.id,JSON.stringify(pending));}catch(e){} };
+  const savePQ=()=>{ if(!sess) return; try{localStorage.setItem(PQ+"-"+sess.id,JSON.stringify(pending)); localStorage.setItem(PQ+"-memo-"+sess.id,JSON.stringify(pm));}catch(e){} };
+  const hasPending=()=>Object.keys(pending).length+Object.keys(pm).length>0;
 
   async function api(body){
     const r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(body)});
@@ -831,19 +876,20 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   // the session stopped being valid (password changed elsewhere, or reset by the admin)
   function authLost(){ endSession(); showAuth("login","다시 로그인해 주세요"); }
 
-  function queue(k,d,v){ if(!sess) return; gen++; pending[ds(k,d)]=v; savePQ(); flush(); }
+  function queue(k,d,v,memo){ if(!sess) return; gen++; const x=ds(k,d); pending[x]=v; if(memo!==undefined) pm[x]=memo; savePQ(); flush(); }
   async function flush(){
-    if(!sess||busy) return;
-    const keys=Object.keys(pending); if(!keys.length) return;
-    busy=true; const sent={}; keys.forEach(x=>sent[x]=pending[x]); let ok=false, lost=false;
+    if(!sess||busy||!hasPending()) return;
+    busy=true; const sent={...pending}, sentM={...pm}; let ok=false, lost=false;
+    const dates=[...new Set([...Object.keys(sent),...Object.keys(sentM)])];
     try{
-      const j=await api({action:"save",id:sess.id,token:sess.token,changes:Object.keys(sent).map(date=>({date,hours:sent[date]}))});
-      if(j&&j.ok){ ok=true; gen++; for(const x in sent){ if(pending[x]===sent[x]) delete pending[x]; } savePQ(); }
+      const changes=dates.map(date=>{ const c={date}; if(date in sent) c.hours=sent[date]; if(date in sentM) c.memo=sentM[date]; return c; });
+      const j=await api({action:"save",id:sess.id,token:sess.token,changes});
+      if(j&&j.ok){ ok=true; gen++; for(const x in sent){ if(pending[x]===sent[x]) delete pending[x]; } for(const x in sentM){ if(pm[x]===sentM[x]) delete pm[x]; } savePQ(); }
       else if(j&&j.error==="auth") lost=true;
     }catch(e){}
     busy=false;
     if(lost){ authLost(); return; }
-    const more=Object.keys(pending).some(x=>!(x in sent)||pending[x]!==sent[x]);
+    const more=Object.keys(pending).some(x=>!(x in sent)||pending[x]!==sent[x])||Object.keys(pm).some(x=>!(x in sentM)||pm[x]!==sentM[x]);
     if(more) flush(); else if(ok) pull();
   }
   async function pull(){
@@ -856,16 +902,18 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     }catch(e){}
   }
   function apply(days){
-    const nd={};
-    const put=(s,v)=>{
-      if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) return;
+    const nd={}, nm={};
+    const ok=s=>/^\d{4}-\d{2}-\d{2}$/.test(s);
+    const put=(o,s,v)=>{
+      if(!ok(s)) return;
       const k=s.slice(0,7), d=String(+s.slice(8,10));
-      if(v>0){(nd[k]=nd[k]||{})[d]=v;} else if(nd[k]) delete nd[k][d];
+      if(v){(o[k]=o[k]||{})[d]=v;} else if(o[k]) delete o[k][d];
     };
-    for(const s in days) put(s,+days[s]);
-    for(const s in pending) put(s,+pending[s]);
-    const same=JSON.stringify(nd)===JSON.stringify(S.data);
-    S.data=nd; cache(); if(!same) render();
+    for(const s in days){ if(s.slice(0,2)==="m:") put(nm,s.slice(2),String(days[s]||"")); else put(nd,s,+days[s]>0?+days[s]:0); }
+    for(const s in pending) put(nd,s,+pending[s]>0?+pending[s]:0);
+    for(const s in pm) put(nm,s,pm[s]);
+    const same=JSON.stringify(nd)===JSON.stringify(S.data)&&JSON.stringify(nm)===JSON.stringify(S.memo);
+    S.data=nd; S.memo=nm; cache(); if(!same) render();
   }
 
   // ---------- login ----------
@@ -887,11 +935,13 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     sess={id,token}; try{localStorage.setItem(SK,JSON.stringify(sess));}catch(e){}
     try{ S.data=JSON.parse(localStorage.getItem(LS+"-"+id)||"{}")||{}; }catch(e){ S.data={}; }
     try{ pending=JSON.parse(localStorage.getItem(PQ+"-"+id)||"{}")||{}; }catch(e){ pending={}; }
+    try{ S.memo=JSON.parse(localStorage.getItem(LS+"-memo-"+id)||"{}")||{}; }catch(e){ S.memo={}; }
+    try{ pm=JSON.parse(localStorage.getItem(PQ+"-memo-"+id)||"{}")||{}; }catch(e){ pm={}; }
     gen++; render(); renderAccount(); flush(); pull(); fetchHolidays();
   }
   function endSession(){
-    if(sess){ try{ localStorage.removeItem(SK); localStorage.removeItem(LS+"-"+sess.id); localStorage.removeItem(PQ+"-"+sess.id); }catch(e){} }
-    sess=null; pending={}; gen++; S.data={}; render(); closeDrawer();
+    if(sess){ try{ localStorage.removeItem(SK); localStorage.removeItem(LS+"-"+sess.id); localStorage.removeItem(PQ+"-"+sess.id); localStorage.removeItem(LS+"-memo-"+sess.id); localStorage.removeItem(PQ+"-memo-"+sess.id); }catch(e){} }
+    sess=null; pending={}; pm={}; gen++; S.data={}; S.memo={}; render(); closeDrawer();
   }
 
   $("loginForm").addEventListener("submit",async e=>{
@@ -939,8 +989,8 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
     busyBtn(b,false,"변경하기");
   });
   $("logoutBtn").onclick=async()=>{
-    if(Object.keys(pending).length){ await flush(); }
-    if(Object.keys(pending).length){ toast("아직 저장되지 않은 기록이 있어요. 인터넷 연결 후 다시 시도해 주세요"); return; }
+    if(hasPending()){ await flush(); }
+    if(hasPending()){ toast("아직 저장되지 않은 기록이 있어요. 인터넷 연결 후 다시 시도해 주세요"); return; }
     endSession(); showAuth("login"); toast("로그아웃했어요");
   };
 
@@ -959,13 +1009,15 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   $("dscrim").onclick=closeDrawer;
 
   // ---------- monthly report + service-year helpers ----------
-  const monthSum=(y,m)=>{ const o=S.data[key(y,m)]||{}; let t=0; for(const d in o){const v=+o[d]; if(v>0) t+=v;} return t; };
+  const monthSum=(y,m)=>{ const o=S.data[key(y,m)]||{}; let t=0; for(const d in o){ if(d==="0") continue; const v=+o[d]; if(v>0) t+=v; } return t; };
+  const monthStudy=(y,m)=>+((S.data[key(y,m)]||{})["0"]||0);
   const syOf=(y,m)=>m>=8?y+1:y;           // service year ends in August; named by its ending year
   function syMonths(sy){ const a=[]; for(let i=0;i<12;i++){ const m=(8+i)%12, y=i<4?sy-1:sy; a.push([y,m]); } return a; }
-  function reportLines(){ const t=monthSum(S.y,S.m); return [S.y+"년 "+(S.m+1)+"월 봉사 보고","봉사 시간: "+num(t)+"시간"]; }
+  function reportLines(){ const t=monthSum(S.y,S.m); return [S.y+"년 "+(S.m+1)+"월 봉사 보고","봉사 시간: "+num(t)+"시간","성서 연구: "+monthStudy(S.y,S.m)+"건"]; }
   function renderMenuInfo(){
     const r=reportLines(), el=$("reportText");
     el.textContent=S.y+"년 "+(S.m+1)+"월"; const sp=document.createElement("span"); sp.textContent="봉사 시간 "+num(monthSum(S.y,S.m))+"시간"; el.appendChild(sp);
+    const sp2=document.createElement("span"); sp2.textContent="성서 연구 "+monthStudy(S.y,S.m)+"건"; el.appendChild(sp2);
     const sy=syOf(S.y,S.m); let t=0; syMonths(sy).forEach(([y,m])=>t+=monthSum(y,m));
     $("statsHint").textContent=sy+" 봉사 연도 · "+num(t)+"시간";
   }
@@ -1042,9 +1094,10 @@ button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   $("resetOk").onclick=()=>{
     if(sess){
       for(const mk in S.data) for(const d in S.data[mk]){ if(+S.data[mk][d]>0) pending[ds(mk,d)]=0; }
+      for(const mk in S.memo) for(const d in S.memo[mk]){ if(S.memo[mk][d]) pm[ds(mk,d)]=""; }
       gen++; savePQ();
     }
-    S.data={}; cache();
+    S.data={}; S.memo={}; cache();
     closeReset(); closeDrawer(); render(true);
     toast("모든 기록을 지웠어요");
     if(sess) flush();
